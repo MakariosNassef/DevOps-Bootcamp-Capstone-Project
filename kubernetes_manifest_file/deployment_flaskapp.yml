@@ -1,0 +1,66 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: flask-deployment
+spec:
+  selector:
+    matchLabels:
+      app: flask
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: flask
+    spec:
+      containers:
+      - name: flask
+        image: makar007/flask:001
+        imagePullPolicy: Always        
+        ports:
+        - containerPort: 5002
+        envFrom:
+          - configMapRef:
+              name: app-configmap
+          - secretRef:
+              name: app-secret
+      volumes:
+      - name: flask-data
+        persistentVolumeClaim:
+          claimName: flask-pv-claim
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: flask-ingress-service
+spec:
+  type: NodePort
+  selector:
+    app: flask
+  ports:
+  - port: 80
+    targetPort: 5002
+    nodePort: 30000
+---
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: flask-pv-claim
+spec:
+  accessModes:
+  - ReadWriteOnce
+  resources:
+    requests:
+      storage: 10Gi
+
+# apiVersion: v1
+# kind: Service
+# metadata:
+#   name: flask-service
+# spec:
+#   type: LoadBalancer
+#   selector:
+#     app: flask
+#   ports:
+#   - port: 5002
+#     targetPort: 5002

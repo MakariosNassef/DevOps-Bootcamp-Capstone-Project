@@ -1,0 +1,50 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mysql-deployment
+spec:
+  selector:
+    matchLabels:
+      component: mysql
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        component: mysql
+    spec:
+      containers:
+      - name: mysql
+        image: makar007/flaskdb:001
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 3306
+        envFrom:
+          - secretRef:
+              name: db-secret
+      volumes:
+      - name: flaskdb-data
+        persistentVolumeClaim:
+          claimName: flaskdb-pv-claim
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mysql
+spec:
+  type: ClusterIP
+  selector:
+    component: mysql
+  ports:
+  - port: 3306
+---
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: flaskdb-pv-claim
+spec:
+  accessModes:
+  - ReadWriteOnce
+  resources:
+    requests:
+      storage: 10Gi

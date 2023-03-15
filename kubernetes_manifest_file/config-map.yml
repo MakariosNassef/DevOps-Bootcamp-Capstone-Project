@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: ConfigMap 
+metadata:
+  name: app-configmap 
+data:
+  MYSQL_DATABASE_DB: BucketList
+  MYSQL_DATABASE_HOST: db
