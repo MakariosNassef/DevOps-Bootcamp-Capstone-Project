@@ -1,59 +1,42 @@
-# locals.tf
-# locals {
-# #   k8s_service_account_name      = "iam-role-test"
-# #   k8s_service_account_namespace = "default"
-
-#   # Get the EKS OIDC Issuer without https:// prefix
-#   eks_oidc_issuer = trimprefix(aws_eks_cluster.eks.identity[0].oidc[0].issuer, "https://")
-
-# }
-# data "aws_region" "current" {
-#     name = "us-east-1"
-# }
-
-# data "external" "thumbprint" {
-#   program = ["thumbprint.sh", data.aws_region.current.name]
-# }
-
-resource "aws_eks_addon" "addon" {
-  cluster_name      = aws_eks_cluster.eks.name
-  addon_name        = "aws-ebs-csi-driver"
-  addon_version     = "v1.11.2-eksbuild.1" #e.g., previous version v1.8.7-eksbuild.2 and the new version is v1.8.7-eksbuild.3
-  resolve_conflicts = "PRESERVE"
-  # service_account_role_arn = local.k8s_service_account_name
-
+locals {
+  local_oidc_url = flatten(aws_eks_cluster.eks.identity[*].oidc[*].issuer)[0]
 }
 
-# data "tls_certificate" "example" {
-#   url = aws_eks_cluster.eks.identity[0].oidc[0].issuer
-# }
+resource "aws_eks_addon" "addon" {
+  cluster_name  = aws_eks_cluster.eks.name
+  addon_name    = "aws-ebs-csi-driver" # Name of Addon i used
+  addon_version = "v1.11.2-eksbuild.1" # e.g., previous version v1.8.7-eksbuild.2 and the new version is v1.8.7-eksbuild.3
+  # service_account_role_arn = local.k8s_service_account_name
+  depends_on = [
+    aws_iam_role_policy_attachment.ebs_csi_plugin_policy_attachment
+  ]
+}
 
-# resource "aws_iam_openid_connect_provider" "example" {
-#   client_id_list  = ["sts.amazonaws.com"]
-#   thumbprint_list = [data.tls_certificate.example.certificates[0].sha1_fingerprint]
-#   url             = aws_eks_cluster.eks.identity[0].oidc[0].issuer
-# }
-
-resource "aws_iam_role" "test_role" {
-  name = "test_role"
-
-  # Terraform's "jsonencode" function converts a
-  # Terraform expression result to valid JSON syntax.
+resource "aws_iam_role" "ebs_csi_plugin_role" {
+  name = "AmazonEKS_EBS_CSI_DriverRole"
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
     Statement = [
       {
-        Action = "sts:AssumeRole"
         Effect = "Allow"
-        Sid    = ""
         Principal = {
-          Service = "ec2.amazonaws.com"
+          Federated = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:oidc-provider/${local.local_oidc_url}"
         }
-      },
+        Action = "sts:AssumeRoleWithWebIdentity"
+        Condition = {
+          StringEquals = {
+            "${local.local_oidc_url}:sub" = "system:serviceaccount:${var.namespace}:${var.service_account_name}"
+          }
+        }
+      }
     ]
   })
+}
 
-  tags = {
-    tag-key = "tag-value"
-  }
+data "aws_caller_identity" "current" {}
+
+resource "aws_iam_role_policy_attachment" "ebs_csi_plugin_policy_attachment" {
+  # policy_arn = "arn:aws:iam::aws:policy/AmazonEBSCSIDriverPolicy"
+  policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonEBSCSIDriverPolicy"
+  role       = aws_iam_role.ebs_csi_plugin_role.name
 }

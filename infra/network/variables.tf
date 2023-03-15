@@ -2,6 +2,11 @@ variable "MAIN_VPC" {
   description = "aws_vpc_Name"
   type        = string
 }
+variable "MAIN_VPC_CIDR_BLOCK" {
+  description = "CIDR"
+  type = string
+}
+
 variable "IGW_NAME" {
   description = "igw_name"
   type        = string

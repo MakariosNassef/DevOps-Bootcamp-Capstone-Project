@@ -1,9 +1,9 @@
 # Create a VPC
 resource "aws_vpc" "main" {
-  cidr_block = "10.0.0.0/16"
+  cidr_block = var.MAIN_VPC_CIDR_BLOCK
   # Must be enabled for EFS
-  enable_dns_support   = true
-  enable_dns_hostnames = true
+  # enable_dns_support   = true
+  # enable_dns_hostnames = true
 
   tags = {
     Name = var.MAIN_VPC
@@ -42,7 +42,8 @@ resource "aws_subnet" "public_us_east_1a" {
   map_public_ip_on_launch = true
 
   tags = {
-    "Name"                      = var.PUBLIC_SUBNET_NAME
+    "Name" = var.PUBLIC_SUBNET_NAME
+    # Ensure your VPC subnets have the proper tags to be discoverable by Kubernetes
     "kubernetes.io/role/elb"    = "1"
     "kubernetes.io/cluster/eks" = "shared"
   }

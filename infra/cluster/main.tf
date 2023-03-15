@@ -18,7 +18,7 @@ resource "aws_eks_cluster" "eks" {
   # Otherwise, EKS will not be able to properly delete EKS managed EC2 infrastructure such as Security Groups.
   depends_on = [
     aws_iam_role_policy_attachment.eks-cluster-AmazonEKSClusterPolicy,
-    aws_iam_role_policy_attachment.eks-cluster-AmazonEKSVPCResourceController,
+    # aws_iam_role_policy_attachment.eks-cluster-AmazonEKSVPCResourceController,
   ]
 }
 
@@ -49,17 +49,16 @@ POLICY
 
 # Resource: aws_iam_role_policy_attachment
 # https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role_policy_attachment
-
 resource "aws_iam_role_policy_attachment" "eks-cluster-AmazonEKSClusterPolicy" {
   policy_arn = "arn:aws:iam::aws:policy/AmazonEKSClusterPolicy"
   role       = aws_iam_role.eks_cluster.name
 }
 
 # Modefaid  
-resource "aws_iam_role_policy_attachment" "eks-cluster-AmazonEKSVPCResourceController" {
-  policy_arn = "arn:aws:iam::aws:policy/AmazonEKSVPCResourceController"
-  role       = aws_iam_role.eks_cluster.name
-}
+# resource "aws_iam_role_policy_attachment" "eks-cluster-AmazonEKSVPCResourceController" {
+#   policy_arn = "arn:aws:iam::aws:policy/AmazonEKSVPCResourceController"
+#   role       = aws_iam_role.eks_cluster.name
+# }
 
 
 

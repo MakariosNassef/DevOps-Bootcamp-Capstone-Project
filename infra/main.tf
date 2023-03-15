@@ -1,6 +1,7 @@
 module "network_module" {
   source                    = "./network"
   MAIN_VPC                  = "main-vpc"
+  MAIN_VPC_CIDR_BLOCK       = "10.0.0.0/16"
   IGW_NAME                  = "igw_main"
   NAT_NAME                  = "nat_gw"
   PUBLIC_ROUTE_NAME         = "public_route_table"
@@ -15,11 +16,28 @@ module "network_module" {
   PUBLIC_SUBNET_NAME        = "public-us-east-1a"
 }
 
-
 module "cluster_module" {
-  source            = "./cluster"
-  VPC_ID            = module.network_module.VPC_ID_OUTPUT
-  PRIVATE_SUBNET_ID = module.network_module.PRIVATE_SUBNET_ID_OUTPUT
-  PUBLIC_SUBNET_ID  = module.network_module.PUBLIC_SUBNET_ID_OUTPUT
-  CLUSTER_NAME      = "eks"
+  source               = "./cluster"
+  VPC_ID               = module.network_module.VPC_ID_OUTPUT
+  PRIVATE_SUBNET_ID    = module.network_module.PRIVATE_SUBNET_ID_OUTPUT
+  PUBLIC_SUBNET_ID     = module.network_module.PUBLIC_SUBNET_ID_OUTPUT
+  CLUSTER_NAME         = "eks"
+  namespace            = "namespace_ebs"
+  service_account_name = "sa_ebs"
+}
+
+module "ecr_module" {
+  source   = "./ecr"
+  ecr_name = "aws_ecr"
+}
+
+module "instance_module" {
+  source           = "./instance"
+  AMI              = "ami-0557a15b87f6559cf"
+  INSTANCE_TYPE    = "t2.micro"
+  PUBLIC_SUBNET_ID = module.network_module.PUBLIC_SUBNET_ID_OUTPUT
+  MAIN_VPC_ID      = module.network_module.VPC_ID_OUTPUT
+  EGRESS_CIDR      = "0.0.0.0/0"
+  INGRESS_CIDER    = "0.0.0.0/0"
+  KEY_PAIR         = "mac-keyPair"
 }
