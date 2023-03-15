@@ -1,8 +1,10 @@
 ---
 - name: Install Jenkins
   hosts:  all
-  #gather_facts: false
+  gather_facts: false
   become: true
+  vars_files:
+    - ../vars.yml
   tasks:
     - name: Task Update APT package manager repositories cache
       become: true
@@ -41,7 +43,24 @@
       shell: cat /var/lib/jenkins/secrets/initialAdminPassword
       changed_when: false
       register: result
+      ignore_errors: yes
+      when: cat_output.rc == 0
 
     - name: Print init password Jenkins
       debug:
         var: result.stdout
+      ignore_errors: yes
+      when: cat_output.rc == 0
+
+    - name: Install Jenkins plugins
+      jenkins_plugin:
+        name: kubernetes
+        state: present
+        url: "http://52.3.236.24:8080/"
+        url_username: "{{ jenkins_admin_username }}"
+        url_password: "{{ jenkins_admin_password }}"
+
+    - name: Restart Jenkins
+      service:
+        name: jenkins
+        state: restarted
