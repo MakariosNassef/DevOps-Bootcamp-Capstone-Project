@@ -11,8 +11,8 @@ resource "aws_instance" "jenkins-instance" {
   # the Public SSH key
   key_name = var.KEY_PAIR
 
-  # installation
-  # user_data = var.user_data
+  # Installing Nginx
+  # user_data = var.USER_DATA
 
   connection {
     user        = var.EC2_USER

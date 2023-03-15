@@ -1,0 +1,76 @@
+podTemplate(yaml: '''
+    apiVersion: v1
+    kind: Pod
+    spec:
+      serviceAccountName: jenkins-admin
+      containers:
+      - name: maven
+        image: maven:3.8.1-jdk-8
+        command:
+        - sleep
+        args:
+        - 99d
+      - name: deployment 
+        image: portainer/kubectl-shell:latest 
+        command:
+        - sleep
+        args:
+        - 3600
+      - name: kaniko
+        image: gcr.io/kaniko-project/executor:debug
+        command:
+        - sleep
+        args:
+        - 9999999
+        volumeMounts:
+        - name: kaniko-secret
+          mountPath: /kaniko/.docker
+      restartPolicy: Never
+      volumes:
+      - name: kaniko-secret
+        secret:
+            secretName: dockercred
+            items:
+            - key: .dockerconfigjson
+              path: config.json
+''') {
+  node(POD_LABEL) {
+
+    stage('Get a repo of the project') {
+      git url: 'https://github.com/MakariosNassef/DevOps-Bootcamp-Capstone-Project.git', branch: 'main' , credentialsId: 'user-github'
+      container('maven') {
+        stage('Build a app project') {
+          sh '''
+          echo pwd
+          env
+          ls
+          '''
+        }
+      }
+    }
+
+    stage('Build flask Image') {
+      container('kaniko') {
+        stage('Build a flask project') {
+          sh '''
+            /kaniko/executor --context `pwd`/flask_app/db --destination makar007/flaskapp:$BUILD_NUMBER
+            /kaniko/executor --context `pwd`/flask_app/FlaskApp --destination makar007/mysqlflask:$BUILD_NUMBER
+          '''
+        }
+      }
+    }
+
+    stage('Update Kubernetes deployment and Deploy app to Kubernetes cluster') {
+      container('deployment') {
+        stage('Deployment') {
+            sh '''
+              echo 'Updating Kubernetes deployment with new container image that in repo'
+              sed -i \"s|image:.*|image: makar007/flaskapp:$BUILD_NUMBER|g\" `pwd`/kubernetes_manifest_file/deployment_flaskapp.yml
+              sed -i \"s|image:.*|image: makar007/mysqlflask:$BUILD_NUMBER|g\" `pwd`/kubernetes_manifest_file/deployment_flaskdb.yml             
+              kubectl apply -f `pwd`/kubernetes_manifest_file
+            '''  
+        }
+      }
+    }
+  }
+}

@@ -26,15 +26,14 @@ variable "INGRESS_CIDER" {
   type = string
 }
 
-# installing Apache
-# variable "user_data"{
+# variable "USER_DATA"{
 #     default = <<-EOF
 #         #!/bin/bash
-#         echo " Installing apache2"
-#         sudo apt update -y
-#         sudo apt install apache2 -y
-#         echo " Completed Installing apache2"
+#         echo " Installing Nginx"
+#         sudo apt update -y &&
+#         sudo apt install -y nginx
+#         echo " Completed Installing Nginx"
 #         EOF
-#     description = "apache2-instance"
+#     description = "Nginx Installation user Data"
 # }
 
