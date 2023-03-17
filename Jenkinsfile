@@ -13,9 +13,9 @@ pipeline {
                     pwd
                     cd $PWD/flask_app/FlaskApp/
                     aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 705434271522.dkr.ecr.us-east-1.amazonaws.com
-                    docker build -t python_app:"$BUILD_NUMBER" .
-                    docker tag python_app:"$BUILD_NUMBER" 705434271522.dkr.ecr.us-east-1.amazonaws.com/python_app:"$BUILD_NUMBER"
-                    docker push 705434271522.dkr.ecr.us-east-1.amazonaws.com/python_app:"$BUILD_NUMBER"
+                    docker build -t python_app:app_"$BUILD_NUMBER" .
+                    docker tag python_app:app_"$BUILD_NUMBER" 705434271522.dkr.ecr.us-east-1.amazonaws.com/python_app:app_"$BUILD_NUMBER"
+                    docker push 705434271522.dkr.ecr.us-east-1.amazonaws.com/python_app:app_"$BUILD_NUMBER"
                     '''
                 }
             }
@@ -38,8 +38,24 @@ pipeline {
         // stage('Cleaning up') {
         //     steps{
         //         sh "docker rmi $registry:$BUILD_NUMBER"
+        //         aws eks update-kubeconfig --region us-east-1 --name eks
         //     }
         // }
+
+        // stage('Apply Deployment file for the python App') {
+        //     steps{
+        //         sh '''
+        //         kubectl apply -f $PWD/kubernetes_manifest_file
+        //         kubectl get svc flask-service
+        //         '''
+        //     }
+        // }
+
+        stage('Apply Kubernetes files') {
+            withKubeConfig([credentialsId: 'token-eks', serverUrl: 'https://E90137EBC49013118FDC9E7063C82DDB.gr7.us-east-1.eks.amazonaws.com']) {
+            sh 'kubectl apply -f $PWD/kubernetes_manifest_file'
+            }
+        }
         }
 
 }
