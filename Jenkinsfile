@@ -53,7 +53,7 @@ pipeline {
 
         stage('Apply Kubernetes files') {
             steps{
-                withKubeConfig([credentialsId: 'user1', serverUrl: 'https://api.k8s.my-company.com']) {
+                withKubeConfig([credentialsId: 'token-eks', serverUrl: 'https://E90137EBC49013118FDC9E7063C82DDB.gr7.us-east-1.eks.amazonaws.com']) {
                 script {
                     sh ''' 
                     kubectl apply -f $PWD/kubernetes_manifest_file
