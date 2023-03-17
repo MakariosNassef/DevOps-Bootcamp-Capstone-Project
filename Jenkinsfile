@@ -3,10 +3,7 @@ pipeline {
     stages {
         stage('Checkout external proj') {
             steps {
-                git branch: 'main',
-                    credentialsId: 'git-credential',
-                    url: 'https://github.com/MakariosNassef/DevOps-Bootcamp-Capstone-Project.git'
-
+                git url: 'https://github.com/MakariosNassef/DevOps-Bootcamp-Capstone-Project.git', branch: 'main' , credentialsId: 'git-credential'
                 sh "ls -lat"
             }
         }
@@ -42,4 +39,4 @@ pipeline {
         // }
         }
 
-    }
+}
