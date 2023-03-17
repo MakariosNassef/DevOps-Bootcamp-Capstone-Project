@@ -4,7 +4,6 @@ pipeline {
         stage('Checkout external proj') {
             steps {
                 git url: 'https://github.com/MakariosNassef/DevOps-Bootcamp-Capstone-Project.git', branch: 'main' , credentialsId: 'git-credential'
-                sh "ls -lat"
             }
         }
         stage('Build Docker image Python app and push to ecr') {
@@ -28,9 +27,9 @@ pipeline {
                     pwd
                     cd $PWD/flask_app/db/
                     aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 705434271522.dkr.ecr.us-east-1.amazonaws.com
-                    docker build -t mysql:9 .
-                    docker tag mysql:9 705434271522.dkr.ecr.us-east-1.amazonaws.com/mysql:9
-                    docker push 705434271522.dkr.ecr.us-east-1.amazonaws.com/mysql:9
+                    docker build -t python_app:db_"$BUILD_NUMBER" .
+                    docker tag python_app:db_"$BUILD_NUMBER" 705434271522.dkr.ecr.us-east-1.amazonaws.com/python_app:db_"$BUILD_NUMBER"
+                    docker push 705434271522.dkr.ecr.us-east-1.amazonaws.com/python_app:db_"$BUILD_NUMBER"
                     '''
                 }
             }
