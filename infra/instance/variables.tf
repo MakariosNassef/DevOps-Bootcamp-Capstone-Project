@@ -26,14 +26,23 @@ variable "INGRESS_CIDER" {
   type = string
 }
 
-# variable "USER_DATA"{
-#     default = <<-EOF
-#         #!/bin/bash
-#         echo " Installing Nginx"
-#         sudo apt update -y &&
-#         sudo apt install -y nginx
-#         echo " Completed Installing Nginx"
-#         EOF
-#     description = "Nginx Installation user Data"
-# }
+variable "USER_DATA"{
+    default = <<-EOF
+        #!/bin/bash
+        echo " Installing Docker"
+        sudo apt update
+        sudo apt install apt-transport-https ca-certificates curl software-properties-common
+        curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
+        sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu focal stable"
+        apt-cache policy docker-ce
+        sudo apt install docker-ce
+        # sudo systemctl status docker
+        sudo usermod -aG docker jenkins
+        sudo usermod -aG docker ubuntu
+        # following command to activate the changes to groups:
+        newgrp docker
+        sudo apt install awscli
+        EOF
+    description = "Docker Installation user Data"
+}
 

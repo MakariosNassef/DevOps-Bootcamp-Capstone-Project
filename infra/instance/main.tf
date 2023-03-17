@@ -5,6 +5,8 @@ resource "aws_instance" "jenkins-instance" {
   }
   instance_type = var.INSTANCE_TYPE
   subnet_id     = var.PUBLIC_SUBNET_ID
+  # Attach the instance profile to the EC2 instance
+  iam_instance_profile = aws_iam_instance_profile.ec2_profile.name
 
   vpc_security_group_ids = [aws_security_group.ssh-allowed.id]
 
@@ -12,12 +14,75 @@ resource "aws_instance" "jenkins-instance" {
   key_name = var.KEY_PAIR
 
   # Installing Nginx
-  # user_data = var.USER_DATA
+  user_data = var.USER_DATA
 
   connection {
     user        = var.EC2_USER
     private_key = file("${var.PRIVATE_KEY_PATH}")
   }
+  depends_on = [
+    aws_iam_role_policy_attachment.ECR_PullPush_role_policy,
+  ]
+}
+
+
+resource "aws_iam_policy" "ECR_PullPush_role_policy" {
+  name = "Amazon_EBS_CSI_Driver"
+
+  policy = <<POLICY
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Effect": "Allow",
+            "Action": [
+                "ecr:GetAuthorizationToken",
+                "ecr:BatchCheckLayerAvailability",
+                "ecr:InitiateLayerUpload",
+                "ecr:UploadLayerPart",
+                "ecr:CompleteLayerUpload",
+                "ecr:PutImage"
+            ],
+            "Resource": "*"
+        }
+    ]
+}
+POLICY
+}
+
+resource "aws_iam_role" "ElasticContainerRegistry_ECR_PullPush" {
+  # The name of the role
+  name = "ECR_PullPush_role"
+
+  # The policy that grants an entity permission to assume the role.
+  # Used to access AWS resources that you might not normally have access to.
+  # The role that Amazon EKS will use to create AWS resources for Kubernetes clusters
+  assume_role_policy = <<POLICY
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Effect": "Allow",
+            "Principal": {
+                "Service": "ec2.amazonaws.com"
+            },
+            "Action": "sts:AssumeRole"
+        }
+    ]
+}
+POLICY
+}
+
+
+# https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role_policy_attachment
+resource "aws_iam_role_policy_attachment" "ECR_PullPush_role_policy_role" {
+  policy_arn = aws_iam_policy.ECR_PullPush_role_policy.arn
+  role       = aws_iam_role.ElasticContainerRegistry_ECR_PullPush.name
+}
+
+resource "aws_iam_instance_profile" "ec2_profile" {
+  name = "ec2_profile"
+  role = aws_iam_role.ElasticContainerRegistry_ECR_PullPush.name
 }
 
 resource "aws_security_group" "ssh-allowed" {
@@ -51,10 +116,10 @@ resource "aws_security_group" "ssh-allowed" {
   }
 }
 
-resource "null_resource" "jenkins_install" {
-  provisioner "local-exec" {
-    #command = "ansible-playbook -i '${var.INSTANCE_PUBLIC_IP_OUTPUT_MODULE},' -u ubuntu --private-key /home/mac/Downloads/mac-keyPair.pem /home/mac/Desktop/DevOps-Bootcamp-Capstone-Project/ansible_jenkins_config/tasks/main.yml"
-    command = "ansible-playbook -i '${aws_instance.jenkins-instance.public_ip},' -u ubuntu --private-key /home/mac/Downloads/mac-keyPair.pem /home/mac/Desktop/DevOps-Bootcamp-Capstone-Project/ansible_jenkins_config/tasks/main.yml"
-  }
-  depends_on = [aws_instance.jenkins-instance, ]
-}
+# resource "null_resource" "jenkins_install" {
+#   provisioner "local-exec" {
+#     #command = "ansible-playbook -i '${var.INSTANCE_PUBLIC_IP_OUTPUT_MODULE},' -u ubuntu --private-key /home/mac/Downloads/mac-keyPair.pem /home/mac/Desktop/DevOps-Bootcamp-Capstone-Project/ansible_jenkins_config/tasks/main.yml"
+#     command = "ansible-playbook -i '${aws_instance.jenkins-instance.public_ip},' -u ubuntu --private-key /home/mac/Downloads/mac-keyPair.pem /home/mac/Desktop/DevOps-Bootcamp-Capstone-Project/ansible_jenkins_config/tasks/main.yml"
+#   }
+#   depends_on = [aws_instance.jenkins-instance, ]
+# }

@@ -8,6 +8,7 @@ aws eks update-kubeconfig --region us-east-1 --name eks
 
 kubectl port-forward deployment/jenkins 8080:8080
 
+kubectl port-forward svc/NAMEOFthe srvice 5002:80
 
 
 to push to ecr

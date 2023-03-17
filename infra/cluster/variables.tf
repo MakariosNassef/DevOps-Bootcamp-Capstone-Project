@@ -6,6 +6,10 @@ variable "PUBLIC_SUBNET_ID" {
   type = string
 }
 
+variable "PUBLIC_SUBNET_ID_2" {
+  type = string
+}
+
 variable "VPC_ID" {
   type = string
 }

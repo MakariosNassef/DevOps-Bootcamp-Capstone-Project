@@ -12,6 +12,7 @@ resource "aws_eks_cluster" "eks" {
     subnet_ids = [
       var.PUBLIC_SUBNET_ID,
       var.PRIVATE_SUBNET_ID,
+      var.PUBLIC_SUBNET_ID_2,
     ]
   }
   # Ensure that IAM Role permissions are created before and deleted after EKS Cluster handling.

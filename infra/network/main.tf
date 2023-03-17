@@ -35,7 +35,36 @@ resource "aws_subnet" "private_us_east_1a" {
   }
 }
 
-resource "aws_subnet" "public_us_east_1a" {
+#new subnet 
+resource "aws_subnet" "public_us_east_2a" {
+  vpc_id                  = aws_vpc.main.id
+  cidr_block              = var.PUBLIC_SUBNET_CIDR_BLOCK_2
+  availability_zone       = var.AVAILABILITY_ZONE_A
+  map_public_ip_on_launch = true
+
+  tags = {
+    "Name" = var.PUBLIC_SUBNET_NAME_2
+    # Ensure your VPC subnets have the proper tags to be discoverable by Kubernetes
+    "kubernetes.io/role/elb"    = "1"
+    "kubernetes.io/cluster/eks" = "shared"
+  }
+}
+
+resource "aws_nat_gateway" "nat_gw2" {
+  allocation_id = aws_eip.nat2.id
+  subnet_id     = aws_subnet.public_us_east_2a.id
+
+  tags = {
+    Name = "gw NAT2"
+  }
+
+  # To ensure proper ordering, it is recommended to add an explicit dependency
+  # on the Internet Gateway for the VPC.
+  depends_on = [aws_internet_gateway.igw_main]
+}
+
+
+resource "aws_subnet" "public_us_east_1b" {
   vpc_id                  = aws_vpc.main.id
   cidr_block              = var.PUBLIC_SUBNET_CIDR_BLOCK
   availability_zone       = var.AVAILABILITY_ZONE_B
@@ -49,8 +78,14 @@ resource "aws_subnet" "public_us_east_1a" {
   }
 }
 
-# Each NAT gateway is created in a specific Availability Zone
+# used 2 nat to make it high available
 resource "aws_eip" "nat1" {
+  #EIP may require IGW to exist prior to association .
+  #Use depends_on to set an explicit dependency on the IGW.
+  depends_on = [aws_internet_gateway.igw_main]
+}
+
+resource "aws_eip" "nat2" {
   #EIP may require IGW to exist prior to association .
   #Use depends_on to set an explicit dependency on the IGW.
   depends_on = [aws_internet_gateway.igw_main]
@@ -58,7 +93,7 @@ resource "aws_eip" "nat1" {
 
 resource "aws_nat_gateway" "nat_gw" {
   allocation_id = aws_eip.nat1.id
-  subnet_id     = aws_subnet.public_us_east_1a.id
+  subnet_id     = aws_subnet.public_us_east_1b.id
 
   tags = {
     Name = var.NAT_NAME
@@ -102,7 +137,11 @@ resource "aws_route_table_association" "private_route_1a" {
 }
 
 resource "aws_route_table_association" "public_route_1a" {
-  subnet_id      = aws_subnet.public_us_east_1a.id
+  subnet_id      = aws_subnet.public_us_east_1b.id
   route_table_id = aws_route_table.public_route_table.id
 }
 
+resource "aws_route_table_association" "public_route_1b" {
+  subnet_id      = aws_subnet.public_us_east_2a.id
+  route_table_id = aws_route_table.public_route_table.id
+}

@@ -4,7 +4,7 @@ variable "MAIN_VPC" {
 }
 variable "MAIN_VPC_CIDR_BLOCK" {
   description = "CIDR"
-  type = string
+  type        = string
 }
 
 variable "IGW_NAME" {
@@ -63,4 +63,13 @@ variable "PUBLIC_SUBNET_NAME" {
   type        = string
 }
 
+variable "PUBLIC_SUBNET_CIDR_BLOCK_2" {
+  description = "PUBLIC_SUBNET_2_CIDR"
+  type        = string
+}
 
+
+variable "PUBLIC_SUBNET_NAME_2" {
+  description = "PUBLIC_SUBNET_NAME_2"
+  type        = string
+}
