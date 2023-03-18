@@ -16,7 +16,7 @@ pipeline {
                     docker build -t python_app:app_"$BUILD_NUMBER" .
                     docker tag python_app:app_"$BUILD_NUMBER" 705434271522.dkr.ecr.us-east-1.amazonaws.com/python_app:app_"$BUILD_NUMBER"
                     docker push 705434271522.dkr.ecr.us-east-1.amazonaws.com/python_app:app_"$BUILD_NUMBER"
-                    echo "Docker Cleaning up"
+                    echo "Docker Cleaning up !"
                     docker rmi 705434271522.dkr.ecr.us-east-1.amazonaws.com/python_app:app_"$BUILD_NUMBER"
                     '''
                 }
