@@ -45,7 +45,7 @@ pipeline {
                 script {
                     sh '''
                     sed -i \"s|image:.*|image: 705434271522.dkr.ecr.us-east-1.amazonaws.com/python_app:app_"$BUILD_NUMBER"|g\" `pwd`/kubernetes_manifest_file/deployment_flaskapp.yml
-                    sed -i \"s|image:.*|image: 705434271522.dkr.ecr.us-east-1.amazonaws.com/python_db:db_"$BUILD_NUMBER"|g\" `pwd`/kubernetes_manifest_file/deployment_flaskapp.yml
+                    sed -i \"s|image:.*|image: 705434271522.dkr.ecr.us-east-1.amazonaws.com/python_db:db_"$BUILD_NUMBER"|g\" `pwd`/kubernetes_manifest_file/statefulSet_flaskdb.yml
                     aws eks update-kubeconfig --region us-east-1 --name eks
                     kubectl apply -f $PWD/kubernetes_manifest_file
                     '''
