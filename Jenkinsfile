@@ -58,7 +58,7 @@ pipeline {
                 script { 
                     sh '''
                     echo "LB SVC URL 🎉 🎉 🎉"
-                    echo $(kubectl get svc flask-service-lb -o jsonpath='{.status.loadBalancer.ingress[0].hostname}')
+                    echo $(kubectl get svc flask-service-lb -o jsonpath='{.status.loadBalancer.ingress[0].hostname}'):5002
                     echo "INGRESS URL 🎉 🎉 🎉"
                     echo $(kubectl get ingress ingress-service -o jsonpath='{.status.loadBalancer.ingress[0].hostname}')
                     '''
