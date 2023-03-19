@@ -1,12 +1,12 @@
 pipeline {
     agent any
     stages {
-        stage('Checkout external proj') {
+        stage('Checkout external proj 🙈🙈🙈') {
             steps {
                 git url: 'https://github.com/MakariosNassef/DevOps-Bootcamp-Capstone-Project.git', branch: 'main' , credentialsId: 'git-credential'
             }
         }
-        stage('Build Docker image Python app and push to ecr') {
+        stage('Build Docker image Python app and push to ecr 🚚📌') {
             steps{
                 script {
                     sh '''
@@ -22,7 +22,7 @@ pipeline {
                 }
             }
         }
-        stage('Build Docker image mysql and push to ecr') {
+        stage('Build Docker image mysql and push to ecr 🚚📌') {
             steps{
                 script {
                     sh '''
@@ -39,7 +39,7 @@ pipeline {
             }
         }
 
-        stage('Apply Kubernetes files') {
+        stage('Apply Kubernetes files 🚀 🎉 ') {
             steps{
                 // withKubeConfig([credentialsId: 'token-eks', serverUrl: 'https://D4D5B42935A6DD8ECD6B3991146B1233.gr7.us-east-1.eks.amazonaws.com']) {
                 script {
