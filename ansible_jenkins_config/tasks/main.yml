@@ -39,19 +39,6 @@
         curl -fsSL https://pkg.jenkins.io/debian/jenkins.io.key | sudo tee /usr/share/keyrings/jenkins-keyring.asc > /dev/null &&
         echo deb [signed-by=/usr/share/keyrings/jenkins-keyring.asc] https://pkg.jenkins.io/debian binary/ | sudo tee /etc/apt/sources.list.d/jenkins.list > /dev/null
     
-    # - name: Get init password Jenkins
-    #   shell: cat /var/lib/jenkins/secrets/initialAdminPassword
-    #   changed_when: false
-    #   register: result
-    #   ignore_errors: yes
-    #   when: cat_output.rc == 0
-
-    # - name: Print init password Jenkins
-    #   debug:
-    #     var: result.stdout
-    #   ignore_errors: yes
-    #   when: cat_output.rc == 0
-
     - name: Create initialization scripts directory
       file: path=/var/lib/jenkins/init.groovy.d
             state=directory
@@ -69,8 +56,8 @@
     - name: Install plugin
       community.general.jenkins_plugin:
         name: "{{ item }}"
-        url_username: "admin"
-        url_password: "admin"
+        url_username: "{{ jenkins_admin_username }}"
+        url_password: "{{ jenkins_admin_username }}"
         url: http://localhost:8080
         timeout: "10000"
         state: latest
@@ -157,7 +144,6 @@
         - workflow-step-api
         - workflow-support
         - ws-cleanup
-        - kubernetes
         
     - name: "Turn off Jenkins setup wizard"
       lineinfile:

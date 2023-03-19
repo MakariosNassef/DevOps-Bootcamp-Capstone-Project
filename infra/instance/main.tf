@@ -21,13 +21,13 @@ resource "aws_instance" "jenkins-instance" {
     private_key = file("${var.PRIVATE_KEY_PATH}")
   }
   depends_on = [
-    aws_iam_role_policy_attachment.ECR_PullPush_role_policy,
+    aws_iam_role_policy_attachment.ECR_PullPush_role_policy_role,
   ]
 }
 
 
 resource "aws_iam_policy" "ECR_PullPush_role_policy" {
-  name = "Amazon_EBS_CSI_Driver"
+  name = "Amazon_ECR_PullPush_role_policy"
 
   policy = <<POLICY
 {
@@ -49,6 +49,25 @@ resource "aws_iam_policy" "ECR_PullPush_role_policy" {
 }
 POLICY
 }
+
+resource "aws_iam_policy" "EKS_Full_access" {
+  name = "Amazon_EKS_Full_access"
+
+  policy = <<POLICY
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Sid": "VisualEditor0",
+            "Effect": "Allow",
+            "Action": "eks:*",
+            "Resource": "*"
+        }
+    ]
+}
+POLICY
+}
+
 
 resource "aws_iam_role" "ElasticContainerRegistry_ECR_PullPush" {
   # The name of the role
@@ -73,12 +92,16 @@ resource "aws_iam_role" "ElasticContainerRegistry_ECR_PullPush" {
 POLICY
 }
 
+resource "aws_iam_role_policy_attachment" "EKS_Full_access_policy_role" {
+  policy_arn = aws_iam_policy.EKS_Full_access.arn
+  role       = aws_iam_role.ElasticContainerRegistry_ECR_PullPush.name
+}
 
-# https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role_policy_attachment
 resource "aws_iam_role_policy_attachment" "ECR_PullPush_role_policy_role" {
   policy_arn = aws_iam_policy.ECR_PullPush_role_policy.arn
   role       = aws_iam_role.ElasticContainerRegistry_ECR_PullPush.name
 }
+
 
 resource "aws_iam_instance_profile" "ec2_profile" {
   name = "ec2_profile"

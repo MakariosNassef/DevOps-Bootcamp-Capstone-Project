@@ -30,8 +30,11 @@ module "cluster_module" {
 }
 
 module "ecr_module" {
-  source   = "./ecr"
-  ecr_name = "aws_ecr"
+  source = "./ecr"
+  ecr_names = [
+    "python_app",
+    "python_db"
+  ]
 }
 
 module "instance_module" {

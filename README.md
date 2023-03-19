@@ -24,3 +24,16 @@ Note: If you receive an error using the AWS CLI, make sure that you have the lat
 
 4- Run the following command to push this image to your newly created AWS repository:
 ``` docker push 705434271522.dkr.ecr.us-east-1.amazonaws.com/aws_ecr:latest ``` 
+
+
+
+### Initially, only the creator of the Amazon EKS cluster has system:masters permissions to configure the cluster. To extend system:masters permissions to other users and roles, you must add the aws-auth ConfigMap to the configuration of the Amazon EKS cluster. The ConfigMap allows other IAM entities, such as users and roles, to access the Amazon EKS cluster.
+``` kubectl edit configmap aws-auth --namespace kube-system ```
+``` aws eks update-kubeconfig --name eks-cluster-name —region aws-region —profile ```
+>> In my-profile
+>> In machine to confirm 
+``` kubectl config view --minify ```
+resorses
+https://aws.amazon.com/premiumsupport/knowledge-center/eks-api-server-unauthorized-error/
+https://aws.amazon.com/premiumsupport/knowledge-center/amazon-eks-cluster-access/
+https://docs.aws.amazon.com/eks/latest/userguide/add-user-role.html

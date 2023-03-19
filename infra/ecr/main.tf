@@ -1,5 +1,6 @@
 resource "aws_ecr_repository" "aws_ecr" {
-  name                 = var.ecr_name
+  for_each             = toset(var.ecr_names)
+  name                 = each.value # var.ecr_name
   image_tag_mutability = "MUTABLE"
 
   image_scanning_configuration {
@@ -38,8 +39,10 @@ data "aws_iam_policy_document" "aws_ecr_policy" {
 }
 
 resource "aws_ecr_repository_policy" "aws_ecr_policy" {
-  repository = aws_ecr_repository.aws_ecr.name
-  policy     = data.aws_iam_policy_document.aws_ecr_policy.json
+  for_each   = toset(var.ecr_names)
+  repository = each.value
+  # repository = aws_ecr_repository.aws_ecr.name
+  policy = data.aws_iam_policy_document.aws_ecr_policy.json
 }
 
 
