@@ -16,7 +16,7 @@ pipeline {
                     docker build -t python_app:app_"$BUILD_NUMBER" .
                     docker tag python_app:app_"$BUILD_NUMBER" 705434271522.dkr.ecr.us-east-1.amazonaws.com/python_app:app_"$BUILD_NUMBER"
                     docker push 705434271522.dkr.ecr.us-east-1.amazonaws.com/python_app:app_"$BUILD_NUMBER"
-                    echo "Docker Cleaning up !"
+                    echo "Docker Cleaning up"
                     docker rmi 705434271522.dkr.ecr.us-east-1.amazonaws.com/python_app:app_"$BUILD_NUMBER"
                     '''
                 }
@@ -39,26 +39,21 @@ pipeline {
             }
         }
 
-        // stage('Apply Deployment file for the python App') {
-        //     steps{
-        //         sh '''
-        //         kubectl apply -f $PWD/kubernetes_manifest_file
-        //         kubectl get svc flask-service
-        //         '''
-        //     }
-        // }
-
         stage('Apply Kubernetes files') {
             steps{
                 // withKubeConfig([credentialsId: 'token-eks', serverUrl: 'https://D4D5B42935A6DD8ECD6B3991146B1233.gr7.us-east-1.eks.amazonaws.com']) {
                 script {
-                    sh ''' 
+                    sh '''
+                    sed -i \"s|image:.*|image: 705434271522.dkr.ecr.us-east-1.amazonaws.com/python_app:app_"$BUILD_NUMBER"|g\" `pwd`/kubernetes_manifest_file/deployment_flaskapp.yml
+                    sed -i \"s|image:.*|image: 705434271522.dkr.ecr.us-east-1.amazonaws.com/python_db:db_"$BUILD_NUMBER"|g\" `pwd`/kubernetes_manifest_file/deployment_flaskapp.yml
+                    aws eks update-kubeconfig --region us-east-1 --name eks
                     kubectl apply -f $PWD/kubernetes_manifest_file
                     '''
                 }
-                }    
-            // }
+                //}    
+            }
         }
 
     }
 }
+
