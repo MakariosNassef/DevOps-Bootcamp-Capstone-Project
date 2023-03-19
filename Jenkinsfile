@@ -53,7 +53,18 @@ pipeline {
                 //}    
             }
         }
-
+        stage('INGRESS and LB URL 🚀 🎉 ') {
+            steps{       
+                script { 
+                    sh '''
+                    echo "LB SVC URL 🎉 🎉 🎉"
+                    echo $(kubectl get svc flask-service-lb -o jsonpath='{.status.loadBalancer.ingress[0].hostname}')
+                    echo "INGRESS URL 🎉 🎉 🎉"
+                    echo $(kubectl get ingress ingress-service -o jsonpath='{.status.loadBalancer.ingress[0].hostname}')
+                    '''
+                }
+            }
+        }
     }
 }
 
