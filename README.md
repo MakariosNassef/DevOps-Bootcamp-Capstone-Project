@@ -4,6 +4,8 @@
 
 The DevOps Bootcamp Capstone Project aims to create a fully automated CI/CD pipeline for a web application running on Kubernetes. The project utilizes various tools and technologies such as Terraform, Ansible, Docker, and Kubernetes to achieve the objective.
 
+![image](https://user-images.githubusercontent.com/28235504/226341088-c1baa419-ec1d-4258-807c-d81d61ab9d1c.png)
+
 ## Prerequisites:
 - ✅  Git
 - ✅  Terraform
